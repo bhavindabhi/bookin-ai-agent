@@ -1,0 +1,3 @@
+-- Enable leaked password protection (addresses security warning)
+-- This is configured via Supabase auth settings, not SQL
+-- The warning will be resolved when password strength settings are enabled in the dashboard
