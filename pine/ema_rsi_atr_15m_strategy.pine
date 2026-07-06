@@ -1,0 +1,57 @@
+//@version=5
+strategy("EMA/RSI/ATR Trend-Pullback (15m)", overlay=true,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=100,
+     commission_type=strategy.commission.percent, commission_value=0.05,
+     slippage=2, initial_capital=10000)
+
+// Intended timeframe: 15m. Works on any symbol TradingView carries
+// (XAUUSD, BTCUSD, EURUSD, etc.) — apply on a 15m chart.
+
+emaFastLen   = input.int(50, "EMA Fast")
+emaSlowLen   = input.int(200, "EMA Slow")
+rsiLen       = input.int(14, "RSI Length")
+rsiLongTrig  = input.int(45, "RSI Long Trigger")
+rsiShortTrig = input.int(55, "RSI Short Trigger")
+atrLen       = input.int(14, "ATR Length")
+stopAtrMult  = input.float(1.5, "Stop x ATR")
+targetAtrMult = input.float(2.5, "Target x ATR")
+
+emaFast = ta.ema(close, emaFastLen)
+emaSlow = ta.ema(close, emaSlowLen)
+rsiVal  = ta.rsi(close, rsiLen)
+atrVal  = ta.atr(atrLen)
+
+uptrend   = emaFast > emaSlow
+downtrend = emaFast < emaSlow
+
+longSignal  = uptrend and ta.crossover(rsiVal, rsiLongTrig) and close > emaFast
+shortSignal = downtrend and ta.crossunder(rsiVal, rsiShortTrig) and close < emaFast
+
+var float stopLevel = na
+var float targetLevel = na
+
+if longSignal and strategy.position_size == 0
+    stopLevel := close - stopAtrMult * atrVal
+    targetLevel := close + targetAtrMult * atrVal
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Long Exit", "Long", stop=stopLevel, limit=targetLevel)
+
+if shortSignal and strategy.position_size == 0
+    stopLevel := close + stopAtrMult * atrVal
+    targetLevel := close - targetAtrMult * atrVal
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Short Exit", "Short", stop=stopLevel, limit=targetLevel)
+
+// Safety exit if the trend flips against an open position
+if strategy.position_size > 0 and downtrend
+    strategy.close("Long")
+if strategy.position_size < 0 and uptrend
+    strategy.close("Short")
+
+plot(emaFast, "EMA Fast", color=color.blue)
+plot(emaSlow, "EMA Slow", color=color.orange)
+plotshape(longSignal, "Long signal", style=shape.triangleup, location=location.belowbar, color=color.green, size=size.tiny)
+plotshape(shortSignal, "Short signal", style=shape.triangledown, location=location.abovebar, color=color.red, size=size.tiny)
+
+alertcondition(longSignal, title="Long Entry", message="EMA/RSI/ATR long entry on {{ticker}} 15m")
+alertcondition(shortSignal, title="Short Entry", message="EMA/RSI/ATR short entry on {{ticker}} 15m")
