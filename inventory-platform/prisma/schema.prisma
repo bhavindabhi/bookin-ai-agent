@@ -21,29 +21,31 @@ model User {
 }
 
 model Supplier {
-  id           Int       @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   name         String
   contactEmail String?
   contactPhone String?
   notes        String?
   products     Product[]
-  createdAt    DateTime  @default(now())
+  reorderLists ReorderList[]
+  createdAt    DateTime      @default(now())
 }
 
 model Product {
-  id               Int             @id @default(autoincrement())
-  barcode          String          @unique
+  id               Int               @id @default(autoincrement())
+  barcode          String            @unique
   name             String
   costPrice        Float?
   sellPrice        Float?
-  stockQuantity    Int             @default(0)
-  reorderThreshold Int             @default(0)
-  reorderQuantity  Int             @default(0)
+  stockQuantity    Int               @default(0)
+  reorderThreshold Int               @default(0)
+  reorderQuantity  Int               @default(0)
   supplierId       Int?
-  supplier         Supplier?       @relation(fields: [supplierId], references: [id])
+  supplier         Supplier?         @relation(fields: [supplierId], references: [id])
   movements        StockMovement[]
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  reorderItems     ReorderListItem[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 }
 
 model StockMovement {
@@ -53,4 +55,27 @@ model StockMovement {
   changeQty Int
   reason    String
   createdAt DateTime @default(now())
+}
+
+// A draft (or sent) purchase order for one supplier. Created from the
+// low-stock view; "sending" it is a mailto: link (opens the shop owner's own
+// email client with the order pre-filled) rather than sending server-side —
+// no email-provider account needed for Phase 2.
+model ReorderList {
+  id         Int               @id @default(autoincrement())
+  supplierId Int
+  supplier   Supplier          @relation(fields: [supplierId], references: [id])
+  status     String            @default("draft") // "draft" | "sent"
+  items      ReorderListItem[]
+  createdAt  DateTime          @default(now())
+  sentAt     DateTime?
+}
+
+model ReorderListItem {
+  id            Int         @id @default(autoincrement())
+  reorderListId Int
+  reorderList   ReorderList @relation(fields: [reorderListId], references: [id], onDelete: Cascade)
+  productId     Int
+  product       Product     @relation(fields: [productId], references: [id])
+  quantity      Int
 }

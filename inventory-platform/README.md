@@ -1,11 +1,11 @@
-# Inventory Platform (Phase 1)
+# Inventory Platform (Phase 1 + 2)
 
 A general-purpose stock tracker for small UK shops — grocery, off-license,
 street food stalls, or anything similar. Scan a product to sell it, watch
-stock drop, see what's low, and know which supplier to reorder it from.
+stock drop, see what's low, and turn that into an order to the right supplier.
 
-This is **Phase 1**: one shop, one login, everything manual except the scan →
-stock decrement itself. See "What's next" below for where this goes.
+This is **Phase 1 + 2**: one shop, one login, everything manual except the
+scan → stock decrement itself. See "What's next" below for where this goes.
 
 ## What it does right now
 
@@ -16,6 +16,12 @@ stock decrement itself. See "What's next" below for where this goes.
 - **Suppliers** — add/edit/delete: name, email, phone, notes.
 - **Low stock** — every product at or below its reorder threshold, grouped by
   supplier, so you can see at a glance what to order from whom.
+- **Draft reorder lists** — one click on the low-stock page creates a draft
+  order per supplier (pre-filled with the low-stock items and their reorder
+  quantities). Edit quantities, remove items, then **"Email this order"** —
+  opens your own email app with the supplier's address, subject, and item
+  list pre-filled, so you just hit send. No email-provider account or API
+  key needed. Mark an order "sent" once you have.
 
 ## Scanning hardware
 
@@ -64,13 +70,11 @@ than one instance.
 
 ## What's next (not built yet)
 
-- **Phase 2** — auto-add low-stock items to a draft "next order" per
-  supplier, and a one-click "send this order" (email first — no approval
-  process needed, unlike WhatsApp).
 - **Phase 3** — multi-tenant: a `Business` model, a `businessId` column on
   every table, and a proper sign-up flow so any shop can create their own
   account instead of there being one hardcoded login.
 - **Stretch** — phone-camera barcode scanning (no hardware scanner needed),
   WhatsApp integration for reorder notifications (reusing the patterns from
   the dental-supplier project once a real WhatsApp Business number is
-  sorted), sales reporting.
+  sorted), sales reporting, sending the order automatically (rather than via
+  mailto:) once there's a reason to add an email-provider account.

@@ -9,6 +9,7 @@ import { scanRouter } from "./routes/scan.js";
 import { productsRouter } from "./routes/products.js";
 import { suppliersRouter } from "./routes/suppliers.js";
 import { lowStockRouter } from "./routes/lowStock.js";
+import { reorderListsRouter } from "./routes/reorderLists.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -44,6 +45,7 @@ app.use(scanRouter);
 app.use(productsRouter);
 app.use(suppliersRouter);
 app.use(lowStockRouter);
+app.use(reorderListsRouter);
 
 const port = Number(process.env.PORT || 3001);
 app.listen(port, () => {

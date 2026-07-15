@@ -2,14 +2,25 @@
 
 <div class="card">
   <h1>Low stock — group by supplier</h1>
-  <p class="muted">Products at or below their reorder threshold. This is the manual version of "next order" — Phase 2 adds a one-click send to supplier.</p>
+  <p class="muted">Products at or below their reorder threshold. Create a draft order per supplier, then edit quantities and email it from the order page.</p>
 
   <% if (groups.length === 0) { %>
     <p class="muted">Nothing is low on stock right now.</p>
   <% } %>
 
   <% groups.forEach(function(group) { %>
-    <h2><%= group.supplierName %></h2>
+    <div class="group-header">
+      <h2><%= group.supplierName %></h2>
+      <% if (group.supplierId === null) { %>
+        <span class="muted">Assign a supplier to these products to create an order.</span>
+      <% } else if (group.draft) { %>
+        <a class="button" href="/reorder-lists/<%= group.draft.id %>">View draft order (<%= group.draft._count.items %> items)</a>
+      <% } else { %>
+        <form method="post" action="/low-stock/<%= group.supplierId %>/create-draft">
+          <button type="submit">Create draft order</button>
+        </form>
+      <% } %>
+    </div>
     <table>
       <thead>
         <tr>
