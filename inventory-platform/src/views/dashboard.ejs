@@ -1,0 +1,53 @@
+<%- include('partials/header', { title: 'Scan', nav: true }) %>
+
+<div class="card narrow">
+  <h1>Scan a product</h1>
+  <p class="muted">Point a barcode scanner at a product, or type a barcode below and press Enter.</p>
+  <form id="scan-form" autocomplete="off">
+    <label>Barcode
+      <input type="text" id="barcode-input" name="barcode" autofocus inputmode="numeric" />
+    </label>
+  </form>
+  <div id="scan-result" class="scan-result"></div>
+  <ul id="scan-log" class="scan-log"></ul>
+</div>
+
+<script>
+  const form = document.getElementById('scan-form');
+  const input = document.getElementById('barcode-input');
+  const resultBox = document.getElementById('scan-result');
+  const log = document.getElementById('scan-log');
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const barcode = input.value.trim();
+    if (!barcode) return;
+    input.value = '';
+
+    const response = await fetch('/api/scan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ barcode }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      resultBox.className = 'scan-result error';
+      resultBox.textContent = data.error;
+    } else {
+      const p = data.product;
+      resultBox.className = 'scan-result ' + (data.lowStock ? 'low-stock' : 'ok');
+      resultBox.textContent = `${p.name} — stock now ${p.stockQuantity}` +
+        (data.lowStock ? ` (LOW STOCK — reorder threshold ${p.reorderThreshold}${p.supplierName ? ', supplier: ' + p.supplierName : ''})` : '') +
+        (data.warning ? ` — ${data.warning}` : '');
+
+      const item = document.createElement('li');
+      item.textContent = `${new Date().toLocaleTimeString()} — ${p.name} (${p.barcode}) → ${p.stockQuantity}`;
+      log.prepend(item);
+    }
+
+    input.focus();
+  });
+</script>
+
+<%- include('partials/footer') %>

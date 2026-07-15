@@ -1,0 +1,34 @@
+<%- include('partials/header', { title: 'Reorder lists', nav: true }) %>
+
+<div class="card">
+  <h1>Reorder lists</h1>
+  <p class="muted">Draft orders are created from the <a href="/low-stock">Low stock</a> page.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Supplier</th>
+        <th>Status</th>
+        <th>Items</th>
+        <th>Created</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% lists.forEach(function(list) { %>
+        <tr>
+          <td><%= list.supplier.name %></td>
+          <td><span class="badge badge-<%= list.status %>"><%= list.status %></span></td>
+          <td><%= list._count.items %></td>
+          <td><%= new Date(list.createdAt).toLocaleDateString('en-GB') %></td>
+          <td><a href="/reorder-lists/<%= list.id %>">View</a></td>
+        </tr>
+      <% }); %>
+      <% if (lists.length === 0) { %>
+        <tr><td colspan="5" class="muted">No reorder lists yet.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

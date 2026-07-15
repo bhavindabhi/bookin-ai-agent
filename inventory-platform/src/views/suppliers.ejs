@@ -1,0 +1,41 @@
+<%- include('partials/header', { title: 'Suppliers', nav: true }) %>
+
+<div class="card">
+  <div class="card-header">
+    <h1>Suppliers</h1>
+    <a class="button" href="/suppliers/new">+ Add supplier</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Products</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% suppliers.forEach(function(s) { %>
+        <tr>
+          <td><%= s.name %></td>
+          <td><%= s.contactEmail || '—' %></td>
+          <td><%= s.contactPhone || '—' %></td>
+          <td><%= s._count.products %></td>
+          <td class="row-actions">
+            <a href="/suppliers/<%= s.id %>/edit">Edit</a>
+            <form method="post" action="/suppliers/<%= s.id %>/delete" onsubmit="return confirm('Delete this supplier? Products stay, just unassigned.');">
+              <button type="submit" class="link-button">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (suppliers.length === 0) { %>
+        <tr><td colspan="5" class="muted">No suppliers yet — add your first one.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

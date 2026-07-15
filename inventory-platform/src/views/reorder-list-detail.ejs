@@ -1,0 +1,56 @@
+<%- include('partials/header', { title: title, nav: true }) %>
+
+<div class="card">
+  <div class="card-header">
+    <h1>Order — <%= list.supplier.name %> <span class="badge badge-<%= list.status %>"><%= list.status %></span></h1>
+    <a class="button" href="/reorder-lists">← All reorder lists</a>
+  </div>
+
+  <% if (!list.supplier.contactEmail) { %>
+    <p class="error">This supplier has no email address on file — add one on their <a href="/suppliers/<%= list.supplier.id %>/edit">supplier page</a> to enable "Email this order".</p>
+  <% } %>
+
+  <form method="post" action="/reorder-lists/<%= list.id %>">
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Barcode</th>
+          <th>Quantity</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% list.items.forEach(function(item) { %>
+          <tr>
+            <td><%= item.product.name %></td>
+            <td><code><%= item.product.barcode %></code></td>
+            <td><input type="number" min="0" name="quantity_<%= item.id %>" value="<%= item.quantity %>" style="width: 6rem" /></td>
+            <td>
+              <form method="post" action="/reorder-lists/<%= list.id %>/items/<%= item.id %>/delete" style="display:inline" onsubmit="return confirm('Remove this item?');">
+                <button type="submit" class="link-button">Remove</button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+        <% if (list.items.length === 0) { %>
+          <tr><td colspan="4" class="muted">No items on this order.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+    <div class="actions-row">
+      <button type="submit">Save quantities</button>
+      <% if (mailtoHref) { %>
+        <a class="button" href="<%= mailtoHref %>">Email this order</a>
+      <% } %>
+    </div>
+  </form>
+
+  <% if (list.status === 'draft') { %>
+    <form method="post" action="/reorder-lists/<%= list.id %>/mark-sent" onsubmit="return confirm('Mark this order as sent?');" class="mark-sent-form">
+      <button type="submit" class="secondary-button">Mark as sent</button>
+    </form>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>
