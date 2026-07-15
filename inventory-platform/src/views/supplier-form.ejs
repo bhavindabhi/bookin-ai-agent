@@ -1,0 +1,25 @@
+<%- include('partials/header', { title: title, nav: true }) %>
+
+<div class="card narrow">
+  <h1><%= title %></h1>
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+  <form method="post" action="<%= supplier && supplier.id ? '/suppliers/' + supplier.id : '/suppliers' %>">
+    <label>Name
+      <input type="text" name="name" value="<%= supplier ? supplier.name || '' : '' %>" required autofocus />
+    </label>
+    <label>Contact email
+      <input type="email" name="contactEmail" value="<%= supplier ? supplier.contactEmail || '' : '' %>" />
+    </label>
+    <label>Contact phone
+      <input type="text" name="contactPhone" value="<%= supplier ? supplier.contactPhone || '' : '' %>" />
+    </label>
+    <label>Notes
+      <textarea name="notes" rows="3"><%= supplier ? supplier.notes || '' : '' %></textarea>
+    </label>
+    <button type="submit">Save supplier</button>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

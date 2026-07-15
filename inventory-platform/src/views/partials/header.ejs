@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><%= title %> · Inventory</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <% if (typeof nav !== "undefined" && nav) { %>
+    <nav class="topnav">
+      <a href="/" class="brand">Inventory</a>
+      <a href="/">Scan</a>
+      <a href="/products">Products</a>
+      <a href="/suppliers">Suppliers</a>
+      <a href="/low-stock">Low stock</a>
+      <form method="post" action="/logout" class="logout-form">
+        <button type="submit">Log out</button>
+      </form>
+    </nav>
+  <% } %>
+  <main class="container">

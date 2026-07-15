@@ -1,0 +1,43 @@
+<%- include('partials/header', { title: 'Products', nav: true }) %>
+
+<div class="card">
+  <div class="card-header">
+    <h1>Products</h1>
+    <a class="button" href="/products/new">+ Add product</a>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Barcode</th>
+        <th>Stock</th>
+        <th>Reorder at</th>
+        <th>Supplier</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% products.forEach(function(p) { %>
+        <tr class="<%= p.stockQuantity <= p.reorderThreshold ? 'row-low-stock' : '' %>">
+          <td><%= p.name %></td>
+          <td><code><%= p.barcode %></code></td>
+          <td><%= p.stockQuantity %></td>
+          <td><%= p.reorderThreshold %></td>
+          <td><%= p.supplier ? p.supplier.name : '—' %></td>
+          <td class="row-actions">
+            <a href="/products/<%= p.id %>/edit">Edit</a>
+            <form method="post" action="/products/<%= p.id %>/delete" onsubmit="return confirm('Delete this product?');">
+              <button type="submit" class="link-button">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+      <% if (products.length === 0) { %>
+        <tr><td colspan="6" class="muted">No products yet — add your first one.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('partials/footer') %>

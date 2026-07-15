@@ -1,0 +1,20 @@
+<%- include('partials/header', { title: 'Set up your account', nav: false }) %>
+
+<div class="card narrow">
+  <h1>Set up your account</h1>
+  <p class="muted">This is a one-time step to create the login for this shop.</p>
+  <% if (typeof error !== 'undefined' && error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+  <form method="post" action="/setup">
+    <label>Email
+      <input type="email" name="email" required autofocus />
+    </label>
+    <label>Password
+      <input type="password" name="password" required minlength="8" />
+    </label>
+    <button type="submit">Create account</button>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

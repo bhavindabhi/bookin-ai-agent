@@ -1,0 +1,42 @@
+<%- include('partials/header', { title: title, nav: true }) %>
+
+<div class="card narrow">
+  <h1><%= title %></h1>
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+  <form method="post" action="<%= product && product.id ? '/products/' + product.id : '/products' %>">
+    <label>Barcode
+      <input type="text" name="barcode" value="<%= product ? product.barcode || '' : '' %>" required autofocus />
+    </label>
+    <label>Name
+      <input type="text" name="name" value="<%= product ? product.name || '' : '' %>" required />
+    </label>
+    <label>Cost price (£)
+      <input type="number" step="0.01" name="costPrice" value="<%= product && product.costPrice != null ? product.costPrice : '' %>" />
+    </label>
+    <label>Sell price (£)
+      <input type="number" step="0.01" name="sellPrice" value="<%= product && product.sellPrice != null ? product.sellPrice : '' %>" />
+    </label>
+    <label>Current stock
+      <input type="number" name="stockQuantity" value="<%= product && product.stockQuantity != null ? product.stockQuantity : 0 %>" required />
+    </label>
+    <label>Reorder threshold <span class="muted">(flag as low stock at or below this)</span>
+      <input type="number" name="reorderThreshold" value="<%= product && product.reorderThreshold != null ? product.reorderThreshold : 0 %>" required />
+    </label>
+    <label>Reorder quantity <span class="muted">(how many to reorder each time)</span>
+      <input type="number" name="reorderQuantity" value="<%= product && product.reorderQuantity != null ? product.reorderQuantity : 0 %>" required />
+    </label>
+    <label>Supplier
+      <select name="supplierId">
+        <option value="">— none —</option>
+        <% suppliers.forEach(function(s) { %>
+          <option value="<%= s.id %>" <%= product && String(product.supplierId) === String(s.id) ? 'selected' : '' %>><%= s.name %></option>
+        <% }); %>
+      </select>
+    </label>
+    <button type="submit">Save product</button>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

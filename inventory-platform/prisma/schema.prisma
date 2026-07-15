@@ -1,0 +1,56 @@
+// Phase 1 schema: single shop, single login. There's no "business" table yet —
+// that's the Phase 3 multi-tenant step (add a Business model, put a
+// businessId on every row below, scope every query by the logged-in user's
+// business). Keeping it out for now avoids modeling multi-tenancy before
+// there's a second shop to prove it against.
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model Supplier {
+  id           Int       @id @default(autoincrement())
+  name         String
+  contactEmail String?
+  contactPhone String?
+  notes        String?
+  products     Product[]
+  createdAt    DateTime  @default(now())
+}
+
+model Product {
+  id               Int             @id @default(autoincrement())
+  barcode          String          @unique
+  name             String
+  costPrice        Float?
+  sellPrice        Float?
+  stockQuantity    Int             @default(0)
+  reorderThreshold Int             @default(0)
+  reorderQuantity  Int             @default(0)
+  supplierId       Int?
+  supplier         Supplier?       @relation(fields: [supplierId], references: [id])
+  movements        StockMovement[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model StockMovement {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  changeQty Int
+  reason    String
+  createdAt DateTime @default(now())
+}

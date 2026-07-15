@@ -1,0 +1,38 @@
+<%- include('partials/header', { title: 'Low stock', nav: true }) %>
+
+<div class="card">
+  <h1>Low stock — group by supplier</h1>
+  <p class="muted">Products at or below their reorder threshold. This is the manual version of "next order" — Phase 2 adds a one-click send to supplier.</p>
+
+  <% if (groups.length === 0) { %>
+    <p class="muted">Nothing is low on stock right now.</p>
+  <% } %>
+
+  <% groups.forEach(function(group) { %>
+    <h2><%= group.supplierName %></h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Barcode</th>
+          <th>Current stock</th>
+          <th>Reorder threshold</th>
+          <th>Reorder quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% group.items.forEach(function(p) { %>
+          <tr class="row-low-stock">
+            <td><%= p.name %></td>
+            <td><code><%= p.barcode %></code></td>
+            <td><%= p.stockQuantity %></td>
+            <td><%= p.reorderThreshold %></td>
+            <td><%= p.reorderQuantity %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% }); %>
+</div>
+
+<%- include('partials/footer') %>
