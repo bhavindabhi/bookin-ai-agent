@@ -23,7 +23,7 @@ export async function suggestPriceForLead(
   if (!sku || quantity == null || requestedUnitPrice == null) {
     const latestReply = db
       .prepare(`SELECT body FROM replies WHERE lead_id = ? ORDER BY received_at DESC LIMIT 1`)
-      .get(leadId) as { body: string } | undefined;
+      .get(leadId) as unknown as { body: string } | undefined;
 
     if (latestReply) {
       const parsed = await parseReplyForOffer(latestReply.body, pricebook);

@@ -20,7 +20,7 @@ export function listSentLog(status?: string): SentLogRow[] {
          WHERE d.status = ?
          ORDER BY d.created_at DESC`
       )
-      .all(status) as SentLogRow[];
+      .all(status) as unknown as SentLogRow[];
   }
   return db
     .prepare(
@@ -28,5 +28,5 @@ export function listSentLog(status?: string): SentLogRow[] {
        FROM drafts d JOIN leads l ON l.id = d.lead_id
        ORDER BY d.created_at DESC`
     )
-    .all() as SentLogRow[];
+    .all() as unknown as SentLogRow[];
 }

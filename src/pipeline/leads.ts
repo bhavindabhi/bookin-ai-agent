@@ -14,11 +14,11 @@ export function listLeads(status?: string): LeadSummary[] {
   if (status) {
     return db
       .prepare(`SELECT id, name, category, country, contact_email, status, discovered_at FROM leads WHERE status = ? ORDER BY discovered_at DESC`)
-      .all(status) as LeadSummary[];
+      .all(status) as unknown as LeadSummary[];
   }
   return db
     .prepare(`SELECT id, name, category, country, contact_email, status, discovered_at FROM leads ORDER BY discovered_at DESC`)
-    .all() as LeadSummary[];
+    .all() as unknown as LeadSummary[];
 }
 
 export function markLeadDoNotContact(leadId: number) {
@@ -46,5 +46,5 @@ export function listLeadsAwaitingPricing(): LeadWithLatestReply[] {
        WHERE l.status = 'awaiting_pricing'
        ORDER BY r.received_at DESC`
     )
-    .all() as LeadWithLatestReply[];
+    .all() as unknown as LeadWithLatestReply[];
 }

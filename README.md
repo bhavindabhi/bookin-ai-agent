@@ -13,6 +13,10 @@ An agent for a dental products/materials business. It:
 
 ## Setup
 
+Requires Node.js 22 or later (uses the built-in `node:sqlite` module — no
+native/compiled dependencies, so `npm install` works on a fresh machine with
+no build tools required).
+
 ```sh
 npm install
 cp .env.example .env

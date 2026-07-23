@@ -57,7 +57,7 @@ export async function sendOutreachToNewLeads(opts: OutreachOptions = {}): Promis
        FROM leads WHERE status = 'new' AND contact_email IS NOT NULL
        LIMIT ?`
     )
-    .all(opts.limit ?? 1_000_000) as LeadRow[];
+    .all(opts.limit ?? 1_000_000) as unknown as LeadRow[];
 
   let sent = 0;
   let failed = 0;

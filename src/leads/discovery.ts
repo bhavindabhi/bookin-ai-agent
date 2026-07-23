@@ -43,22 +43,19 @@ export async function discoverAndStoreLeads(
   const provider = selectProvider(providerOverride);
   const leads = await provider.discover(query);
 
-  const insertMany = db.transaction((rows: DiscoveredLead[]) => {
-    for (const lead of rows) {
-      insertLead.run({
-        name: lead.name,
-        category: lead.category,
-        country: lead.country,
-        region_query: query.region,
-        contact_email: lead.contactEmail ?? null,
-        contact_name: lead.contactName ?? null,
-        website: lead.website ?? null,
-        source_url: lead.sourceUrl ?? null,
-        notes: lead.notes ?? null,
-      });
-    }
-  });
-  insertMany(leads);
+  for (const lead of leads) {
+    insertLead.run({
+      name: lead.name,
+      category: lead.category,
+      country: lead.country,
+      region_query: query.region,
+      contact_email: lead.contactEmail ?? null,
+      contact_name: lead.contactName ?? null,
+      website: lead.website ?? null,
+      source_url: lead.sourceUrl ?? null,
+      notes: lead.notes ?? null,
+    });
+  }
 
   return { provider: provider.name, found: leads.length, leads };
 }
