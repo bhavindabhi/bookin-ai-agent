@@ -1,7 +1,6 @@
 import { completeText } from "../llm/client.js";
 import type { BusinessInfo } from "../config/business.js";
 import type { Pricebook } from "../pricing/pricebook.js";
-import type { NegotiationResult } from "../pricing/negotiationEngine.js";
 
 export interface LeadLike {
   name: string;
@@ -18,16 +17,25 @@ export interface DraftEmail {
 const OPT_OUT_NOTE =
   "If you'd rather not receive future messages like this, just reply \"unsubscribe\" and I won't contact you again.";
 
+/**
+ * Composes the initial B2B outreach email for a lead. Uses Claude for a
+ * personalized note if ANTHROPIC_API_KEY is set; otherwise falls back to a
+ * plain template so the agent works with zero LLM setup.
+ */
 export async function composeOutreachEmail(
   lead: LeadLike,
-  pricebook: Pricebook,
-  business: BusinessInfo
+  business: BusinessInfo,
+  pricebook?: Pricebook
 ): Promise<DraftEmail> {
-  const productList = pricebook.products
-    .map((p) => `- ${p.name} (${p.sku}): from ${pricebook.currency} ${p.listPrice} per ${p.unit}, better pricing at volume`)
-    .join("\n");
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return templateOutreachEmail(lead, business);
+  }
 
-  const system = `You write short, professional, non-spammy B2B cold outreach emails introducing a dental products supplier to a potential regular buyer (dental clinic, lab, or distributor). Tone: warm, direct, low-pressure. No hype/superlatives. Keep it under 150 words. Output ONLY valid JSON: {"subject": string, "body": string}. The body must be plain text (no markdown), must include the sender's name and business name, and must end with the exact opt-out line provided.`;
+  const productLine = pricebook
+    ? pricebook.products.map((p) => `- ${p.name} (${p.sku})`).join("\n")
+    : "- Dental consumables and materials (gloves, composites, impression materials, and more)";
+
+  const system = `You write short, professional, non-spammy B2B cold outreach emails introducing a dental materials supplier to a potential regular buyer (dental clinic, lab, or distributor). Tone: warm, direct, low-pressure. No hype/superlatives. Keep it under 150 words. Output ONLY valid JSON: {"subject": string, "body": string}. The body must be plain text (no markdown), must clearly identify our business and that we trade B2B in dental materials, must include the sender's name and business name, and must end with the exact opt-out line provided.`;
 
   const user = `Recipient business: ${lead.name} (${lead.category}, ${lead.country})${
     lead.contactName ? `\nContact: ${lead.contactName}` : ""
@@ -36,44 +44,31 @@ export async function composeOutreachEmail(
 Our business: ${business.businessName}, sender ${business.senderName} <${business.senderEmail}>, address: ${business.address}
 
 Our product range (sample, do not list all — mention 1-2 relevant categories):
-${productList}
+${productLine}
 
-Goal: introduce ourselves as a reliable supplier for their regular dental product/material needs, invite them to share what they currently buy and volumes, so we can send tailored pricing. Include this exact opt-out line verbatim at the end of the body: "${OPT_OUT_NOTE}"`;
+Goal: introduce ourselves as a reliable B2B trade supplier for their regular dental material needs, invite them to get in touch with what they currently buy and volumes so we can follow up with pricing. Include this exact opt-out line verbatim at the end of the body: "${OPT_OUT_NOTE}"`;
 
   const raw = await completeText(system, user);
   return parseJsonEmail(raw);
 }
 
-export async function composeNegotiationReply(
-  lead: LeadLike,
-  inboundReplyText: string,
-  negotiation: NegotiationResult,
-  productName: string,
-  currency: string,
-  business: BusinessInfo
-): Promise<DraftEmail> {
-  const system = `You write short, professional B2B email replies negotiating price for dental product orders. Tone: warm, direct, confident but flexible. Never mention "floor price" or internal cost reasoning to the buyer. Output ONLY valid JSON: {"subject": string, "body": string}. Plain text body, under 150 words, ending with the sender's name and business name.`;
+function templateOutreachEmail(lead: LeadLike, business: BusinessInfo): DraftEmail {
+  const greeting = lead.contactName ? `Hello ${lead.contactName},` : "Hello,";
+  const subject = `B2B dental materials supply — ${business.businessName}`;
+  const body = `${greeting}
 
-  const decisionInstruction =
-    negotiation.decision === "accept"
-      ? `We are ACCEPTING their price of ${currency} ${negotiation.recommendedUnitPrice} per unit for qty ${negotiation.quantity}. Confirm the deal warmly and ask for the go-ahead / PO details.`
-      : negotiation.decision === "counter"
-        ? `We are COUNTER-OFFERING at ${currency} ${negotiation.recommendedUnitPrice} per unit for qty ${negotiation.quantity}. Justify briefly (e.g. volume, quality, reliable supply) and invite them to confirm or continue discussing.`
-        : `We are sending an OPENING QUOTE of ${currency} ${negotiation.recommendedUnitPrice} per unit for qty ${negotiation.quantity}, since they haven't proposed a price yet.`;
+My name is ${business.senderName} from ${business.businessName}. We trade B2B in dental products and materials, supplying clinics, labs, and distributors both locally and internationally.
 
-  const user = `Buyer: ${lead.name} (${lead.country})
-Their message to us:
-"""
-${inboundReplyText}
-"""
+We'd like to be considered as a regular supplier for ${lead.name}. If you can let us know what you currently purchase and typical volumes, we'll follow up with pricing tailored to your needs.
 
-Product under discussion: ${productName}
-${decisionInstruction}
+Best regards,
+${business.senderName}
+${business.businessName}
+${business.senderEmail}
+${business.address}
 
-Our business: ${business.businessName}, sender ${business.senderName} <${business.senderEmail}>`;
-
-  const raw = await completeText(system, user);
-  return parseJsonEmail(raw);
+${OPT_OUT_NOTE}`;
+  return { subject, body };
 }
 
 function parseJsonEmail(raw: string): DraftEmail {

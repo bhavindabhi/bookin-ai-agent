@@ -1,10 +1,11 @@
 import "dotenv/config";
 import fs from "node:fs";
 import { discoverAndStoreLeads } from "./leads/discovery.js";
-import { draftOutreachForNewLeads } from "./pipeline/draftOutreach.js";
-import { processReply } from "./pipeline/processReply.js";
-import { listDrafts, approveDraft, rejectDraft, markDraftSent } from "./pipeline/reviewDrafts.js";
-import { listLeads, closeDeal } from "./pipeline/leads.js";
+import { sendOutreachToNewLeads } from "./pipeline/outreach.js";
+import { logReply } from "./pipeline/logReply.js";
+import { suggestPriceForLead } from "./pipeline/suggestPrice.js";
+import { listLeads, closeDeal, markLeadDoNotContact } from "./pipeline/leads.js";
+import { listSentLog } from "./pipeline/sentLog.js";
 import { generateDashboard } from "./pipeline/dashboard.js";
 
 function arg(flag: string): string | undefined {
@@ -22,72 +23,52 @@ async function main() {
     case "discover": {
       const category = arg("--category") ?? "dental clinic";
       const region = arg("--region");
-      if (!region) throw new Error("Usage: discover --region <country/region> [--category <text>] [--limit <n>]");
+      if (!region) throw new Error("Usage: discover --region <country/region> [--category <text>] [--limit <n>] [--provider mock|web-scrape|serpapi|google-places]");
       const limit = arg("--limit") ? Number(arg("--limit")) : undefined;
-      const result = await discoverAndStoreLeads({ category, region, limit });
+      const result = await discoverAndStoreLeads({ category, region, limit }, arg("--provider"));
       console.log(`[${result.provider}] found ${result.found} lead(s) for "${category}" in "${region}"`);
-      for (const l of result.leads) console.log(`  - ${l.name} <${l.contactEmail ?? "no email"}>`);
+      for (const l of result.leads) console.log(`  - ${l.name} <${l.contactEmail ?? "no email found"}>`);
       break;
     }
 
-    case "draft-outreach": {
-      const result = await draftOutreachForNewLeads();
-      console.log(`Drafted ${result.drafted} outreach email(s). Skipped ${result.skipped} lead(s) with no contact email.`);
+    case "outreach": {
+      const dryRun = hasFlag("--dry-run");
+      const limit = arg("--limit") ? Number(arg("--limit")) : undefined;
+      const delayMs = arg("--delay-ms") ? Number(arg("--delay-ms")) : undefined;
+      console.log(dryRun ? "Dry run — composing but not sending." : "Sending outreach emails via your configured Outlook account...");
+      const result = await sendOutreachToNewLeads({ dryRun, limit, delayMs });
+      console.log(
+        `Attempted ${result.attempted}. Sent ${result.sent}. Drafted (dry-run) ${result.drafted}. Failed ${result.failed}. ` +
+          `Skipped ${result.skippedNoEmail} lead(s) with no contact email.`
+      );
       break;
     }
 
-    case "process-reply": {
+    case "log-reply": {
       const leadId = arg("--lead-id");
       const file = arg("--file");
       const text = arg("--text");
-      const sku = arg("--sku");
       if (!leadId || (!file && !text)) {
-        throw new Error("Usage: process-reply --lead-id <id> (--file <path> | --text \"...\") [--sku <SKU>]");
+        throw new Error('Usage: log-reply --lead-id <id> (--file <path> | --text "...")');
       }
       const replyText = file ? fs.readFileSync(file, "utf-8") : (text as string);
-      const result = await processReply({ leadId: Number(leadId), replyText, sku });
-      console.log(`Negotiation decision: ${result.negotiation.decision} @ ${result.negotiation.recommendedUnitPrice} per unit`);
-      console.log(`Draft created: "${result.draftSubject}"`);
+      logReply(Number(leadId), replyText);
+      console.log(`Logged reply for lead ${leadId}. Status set to awaiting_pricing — go ahead and price it yourself.`);
       break;
     }
 
-    case "review": {
-      const status = arg("--status") ?? "pending_review";
-      const drafts = listDrafts(status);
-      if (!drafts.length) {
-        console.log(`No drafts with status "${status}".`);
-        break;
-      }
-      for (const d of drafts) {
-        console.log(`\n#${d.id} [${d.type}] -> ${d.lead_name} <${d.contact_email ?? "no email"}>`);
-        console.log(`Subject: ${d.subject}`);
-        console.log(d.body);
-        console.log("---");
-      }
-      break;
-    }
-
-    case "approve": {
-      const id = arg("--draft-id");
-      if (!id) throw new Error("Usage: approve --draft-id <id>");
-      approveDraft(Number(id));
-      console.log(`Draft ${id} approved.`);
-      break;
-    }
-
-    case "reject": {
-      const id = arg("--draft-id");
-      if (!id) throw new Error("Usage: reject --draft-id <id>");
-      rejectDraft(Number(id));
-      console.log(`Draft ${id} rejected.`);
-      break;
-    }
-
-    case "mark-sent": {
-      const id = arg("--draft-id");
-      if (!id) throw new Error("Usage: mark-sent --draft-id <id>  (run this after you've pasted it into Outlook and hit send)");
-      markDraftSent(Number(id));
-      console.log(`Draft ${id} marked sent.`);
+    case "suggest-price": {
+      const leadId = arg("--lead-id");
+      if (!leadId) throw new Error("Usage: suggest-price --lead-id <id> [--sku <SKU>] [--qty <n>] [--offer <price>]");
+      const sku = arg("--sku");
+      const qty = arg("--qty") ? Number(arg("--qty")) : undefined;
+      const offer = arg("--offer") ? Number(arg("--offer")) : undefined;
+      const result = await suggestPriceForLead(Number(leadId), { sku, quantity: qty, offer });
+      console.log(`Product: ${result.product}`);
+      console.log(`Decision: ${result.decision}`);
+      console.log(`Suggested unit price: ${result.currency} ${result.recommendedUnitPrice} (floor: ${result.floorPrice}) for qty ${result.quantity}`);
+      console.log(`Rationale: ${result.rationale}`);
+      console.log("\nThis is a suggestion only — nothing was sent. Reply to the client yourself with your price.");
       break;
     }
 
@@ -96,6 +77,14 @@ async function main() {
       for (const l of listLeads(status)) {
         console.log(`#${l.id} [${l.status}] ${l.name} (${l.category}, ${l.country}) <${l.contact_email ?? "no email"}>`);
       }
+      break;
+    }
+
+    case "do-not-contact": {
+      const leadId = arg("--lead-id");
+      if (!leadId) throw new Error("Usage: do-not-contact --lead-id <id>");
+      markLeadDoNotContact(Number(leadId));
+      console.log(`Lead ${leadId} marked do_not_contact.`);
       break;
     }
 
@@ -109,6 +98,14 @@ async function main() {
       break;
     }
 
+    case "sent-log": {
+      const status = arg("--status");
+      for (const d of listSentLog(status)) {
+        console.log(`#${d.id} [${d.status}] -> ${d.lead_name} <${d.contact_email ?? "no email"}> :: ${d.subject}`);
+      }
+      break;
+    }
+
     case "dashboard": {
       const out = generateDashboard(arg("--out") ?? "dashboard.html");
       console.log(`Dashboard written to ${out}`);
@@ -119,15 +116,14 @@ async function main() {
       console.log(`Dental Supply Outreach Agent
 
 Commands:
-  discover --region "<country/region>" [--category "dental clinic"] [--limit 10]
-  draft-outreach
-  process-reply --lead-id <id> (--file reply.txt | --text "...") [--sku <SKU>]
-  review [--status pending_review|approved|sent|rejected]
-  approve --draft-id <id>
-  reject --draft-id <id>
-  mark-sent --draft-id <id>
-  leads [--status new|contacted|negotiating|won|lost|do_not_contact]
+  discover --region "<country/region>" [--category "dental clinic"] [--limit 10] [--provider mock|web-scrape|serpapi|google-places]
+  outreach [--dry-run] [--limit N] [--delay-ms N]      composes + actually sends via your Outlook SMTP account
+  log-reply --lead-id <id> (--file reply.txt | --text "...")   record a client's reply, no auto response
+  suggest-price --lead-id <id> [--sku <SKU>] [--qty <n>] [--offer <price>]   read-only pricing suggestion
+  leads [--status new|contacted|awaiting_pricing|won|lost|do_not_contact]
+  do-not-contact --lead-id <id>
   close-deal --lead-id <id> (--won | --lost)
+  sent-log [--status sent|failed|drafted]
   dashboard [--out dashboard.html]
 `);
   }

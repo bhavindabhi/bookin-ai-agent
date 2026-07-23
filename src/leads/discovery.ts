@@ -1,13 +1,26 @@
 import { db } from "../db/client.js";
 import type { DiscoveredLead, DiscoveryQuery, LeadProvider } from "./types.js";
 import { mockProvider } from "./providers/mock.js";
+import { webScrapeProvider } from "./providers/webScrape.js";
 import { serpApiProvider } from "./providers/serpapi.js";
 import { googlePlacesProvider } from "./providers/googlePlaces.js";
 
-function selectProvider(): LeadProvider {
+const PROVIDERS: Record<string, LeadProvider> = {
+  mock: mockProvider,
+  "web-scrape": webScrapeProvider,
+  serpapi: serpApiProvider,
+  "google-places": googlePlacesProvider,
+};
+
+function selectProvider(override?: string): LeadProvider {
+  if (override) {
+    const provider = PROVIDERS[override];
+    if (!provider) throw new Error(`Unknown provider "${override}". Options: ${Object.keys(PROVIDERS).join(", ")}`);
+    return provider;
+  }
   if (process.env.GOOGLE_PLACES_API_KEY) return googlePlacesProvider;
   if (process.env.SERPAPI_KEY) return serpApiProvider;
-  return mockProvider;
+  return webScrapeProvider; // free, no API key required
 }
 
 const insertLead = db.prepare(`
@@ -19,12 +32,15 @@ const insertLead = db.prepare(`
     notes = COALESCE(excluded.notes, leads.notes)
 `);
 
-export async function discoverAndStoreLeads(query: DiscoveryQuery): Promise<{
+export async function discoverAndStoreLeads(
+  query: DiscoveryQuery,
+  providerOverride?: string
+): Promise<{
   provider: string;
   found: number;
   leads: DiscoveredLead[];
 }> {
-  const provider = selectProvider();
+  const provider = selectProvider(providerOverride);
   const leads = await provider.discover(query);
 
   const insertMany = db.transaction((rows: DiscoveredLead[]) => {

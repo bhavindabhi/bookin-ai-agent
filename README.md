@@ -2,17 +2,14 @@
 
 An agent for a dental products/materials business. It:
 
-1. **Discovers leads** — local and international dental clinics, labs, and
-   distributors who might buy regularly.
-2. **Drafts personalized outreach emails** for you to send from Outlook.
-3. **Negotiates price** on inbound replies using pricing rules you set
-   (floor price, volume discount tiers) — always as a **draft you approve**,
-   never sent automatically.
-4. **Tracks the pipeline** (new → contacted → negotiating → won/lost) so you
-   can see who's where.
-
-Nothing is ever emailed without you personally reviewing and hitting send.
-This is deliberate — see "Why draft-only" below.
+1. **Scrapes/discovers leads** — local and international dental clinics,
+   labs, and distributors who might buy regularly.
+2. **Sends a B2B outreach email automatically** from your Outlook account,
+   introducing your business and that you trade B2B in dental materials.
+3. **Logs replies** when a client gets back to you — and stops there.
+   **Pricing and closing is on you**: you decide the number and reply
+   yourself. The agent can optionally suggest a price against your own
+   pricebook, but it never sends pricing or negotiates on its own.
 
 ## Setup
 
@@ -23,74 +20,73 @@ cp .env.example .env
 
 Edit `.env`:
 
-- `ANTHROPIC_API_KEY` — **required**. Powers email drafting and reply
-  understanding. Get one at https://console.anthropic.com.
+- `EMAIL_USER`, `EMAIL_APP_PASSWORD` — **required to actually send**. Your
+  Outlook mailbox + an SMTP app password.
+  - Outlook.com (personal): enable 2-factor auth, then create an app
+    password at https://account.live.com/proofs/AppPassword. Use
+    `smtp.office365.com:587`.
+  - Microsoft 365 / work account: your org's admin needs to enable SMTP AUTH
+    for the mailbox (many tenants disable it by default). If they won't, the
+    fallback is Microsoft Graph API with `Mail.Send` permission instead of
+    SMTP — a bigger setup step, ask if you want that wired in later.
 - `BUSINESS_NAME`, `SENDER_NAME`, `SENDER_EMAIL`, `BUSINESS_ADDRESS` —
   **required**. Used in every outreach email. A physical address is required
   by CAN-SPAM (US) and expected under GDPR/PECR (UK/EU) for B2B marketing
   email — see "Legal notes" below.
-- `SERPAPI_KEY` or `GOOGLE_PLACES_API_KEY` — **optional**. Without either,
-  lead discovery uses a `mock` provider that returns sample leads so you can
-  test the full pipeline before wiring up a real search source.
-  - SerpAPI (https://serpapi.com) does Google-search-based discovery — wider
-    net, noisier, will find blogs/directories as well as businesses.
-  - Google Places API — verified business names/websites/phone via Google's
-    business database, but rarely returns email addresses directly (you'll
-    often need to check the website yourself before drafting outreach).
-
-Edit `src/config/pricebook.example.json` (or point `PRICEBOOK_PATH` at your
-own file) with your real products: list price, floor price (minimum you'll
-accept), and volume discount tiers. The negotiation engine never proposes a
-price below floor.
+- `EMAIL_SEND_DELAY_MS` — delay between each send (default 4000ms). Keeps
+  you under Outlook's sending limits and avoids looking like a spam blast.
+- `ANTHROPIC_API_KEY` — **optional**. Without it, outreach emails use a
+  plain template (still fully functional). With it, each email is
+  personalized per lead.
+- `SERPAPI_KEY` / `GOOGLE_PLACES_API_KEY` — **optional**. Without either,
+  lead discovery scrapes the web directly (DuckDuckGo search + fetching
+  each result page for an email address) — free, no key needed, but
+  noisier than a paid business-data API. Always spot-check a lead before
+  trusting the scraped email.
 
 ## Workflow
 
 ```sh
-# 1. Find leads
+# 1. Find leads (scrapes the web by default — no API key required)
 npm run agent -- discover --region "United Kingdom" --category "dental clinic" --limit 10
 npm run agent -- discover --region "United Arab Emirates" --category "dental supply distributor"
 
-# 2. Draft outreach emails for every new lead with a contact email
-npm run agent -- draft-outreach
+# 2. Send the B2B outreach email — this actually sends, for real, via your Outlook account
+npm run agent -- outreach
+# ...or preview first without sending anything:
+npm run agent -- outreach --dry-run
 
-# 3. Review drafts (terminal or open the dashboard)
-npm run agent -- review
-npm run agent -- dashboard   # writes dashboard.html — open it in a browser
+# 3. When a client replies (you'll see it in your own Outlook inbox), log it:
+npm run agent -- log-reply --lead-id 3 --text "Hi, interested — what's your price on gloves, 500 boxes?"
+# The lead is now flagged "awaiting_pricing". The agent stops here on purpose.
 
-# 4. Approve, then copy each into a new Outlook email and send it yourself
-npm run agent -- approve --draft-id 1
-npm run agent -- mark-sent --draft-id 1     # after you've actually sent it
+# 4. Optional: get a suggested price against your own pricebook before replying yourself
+npm run agent -- suggest-price --lead-id 3
 
-# 5. When a reply comes in, paste it in and let the agent propose a response
-npm run agent -- process-reply --lead-id 3 --text "Hi, interested — can you do 500 boxes of gloves at 4.50 each?"
-npm run agent -- review
-npm run agent -- approve --draft-id 2
-npm run agent -- mark-sent --draft-id 2
-
-# 6. Track outcomes
-npm run agent -- leads --status negotiating
+# 5. You reply with the actual price yourself, directly in Outlook. Then:
+npm run agent -- leads --status awaiting_pricing
 npm run agent -- close-deal --lead-id 3 --won
+
+# See everything at a glance
+npm run agent -- dashboard   # writes dashboard.html — open it in a browser
+npm run agent -- sent-log    # what's actually been sent, and what failed
 ```
 
-Data is stored locally in `data/agent.db` (SQLite) — leads, drafts, and
-deals all persist between runs.
+Data is stored locally in `data/agent.db` (SQLite) — leads, sent-email log,
+and client replies all persist between runs.
 
-## Why draft-only
+## Why the agent stops after logging a reply
 
-Two things need a human in the loop before this can safely run unattended:
+Sending the first-touch outreach is safe to automate — it's a template
+introduction, not a commitment. Pricing is a real business decision, so the
+agent never computes-and-sends a counter-offer on its own. `suggest-price`
+exists purely as a calculator you can consult; it prints a number to your
+terminal and touches nothing else. You always write and send the actual
+price yourself.
 
-- **Sending as you** requires an Azure AD app registration with Microsoft
-  Graph `Mail.Send` permission on your Outlook account. That's a real step
-  with real access — worth doing once you trust the drafts it's producing.
-- **Committing to a price** is a business decision. The negotiation engine
-  computes a recommended offer within the bounds you set, but it's a draft
-  until you approve it.
-
-Once you're happy with the quality of drafts, the natural next step is
-wiring `mark-sent` up to actually call the Microsoft Graph `sendMail` API
-instead of being a manual step — the codebase is structured so that's a
-small, isolated change (replace the manual "paste into Outlook" step in the
-workflow above with an authenticated Graph API call).
+If you later want the agent to also *draft* (not send) a suggested reply
+using your pricebook, that's a small addition on top of `suggest-price` —
+ask and it can be wired in.
 
 ## Legal notes on cold outreach (read before scaling this up)
 
@@ -102,9 +98,16 @@ workflow above with an authenticated Graph API call).
   than to individuals, but you should still identify yourself clearly,
   state why you're contacting them, and honor opt-outs immediately. Avoid
   emailing personal/individual addresses without a lawful basis.
-- **Do-not-contact**: if anyone asks to stop hearing from you, mark that
-  lead `do_not_contact` (add a CLI hook or update the DB directly) and never
-  draft outreach to them again.
+- **Sending limits / deliverability**: Outlook/Office 365 SMTP throttles
+  and can flag accounts that suddenly send lots of near-identical emails.
+  Keep `EMAIL_SEND_DELAY_MS` set, start with small batches (`--limit`), and
+  watch `sent-log` for failures before scaling up.
+- **Do-not-contact**: if anyone asks to stop hearing from you, run
+  `do-not-contact --lead-id <id>` immediately.
+- **Scraped emails**: the free web-scrape provider pulls email addresses it
+  finds on public pages — verify a handful manually before a big send, it
+  will occasionally pick up the wrong address (e.g. a webmaster/privacy
+  contact instead of sales/procurement).
 - This is general orientation, not legal advice — if you're going to send
   outreach at real volume internationally, it's worth a quick check with
   someone who knows the rules in the countries you're targeting.
@@ -113,10 +116,11 @@ workflow above with an authenticated Graph API call).
 
 ```
 src/
-  leads/            lead discovery (provider interface + mock/SerpAPI/Places)
-  pricing/          pricebook + rule-based negotiation engine
-  outreach/         LLM email drafting + reply parsing
-  pipeline/         orchestration: discover, draft, process-reply, review, dashboard
+  leads/            lead discovery: mock / free web-scrape / SerpAPI / Google Places
+  email/             SMTP sender (Outlook)
+  pricing/          pricebook + rule-based negotiation engine (used only by suggest-price)
+  outreach/         email composer (LLM or template) + reply parsing
+  pipeline/         orchestration: discover, outreach, log-reply, suggest-price, leads, dashboard
   db/                SQLite schema + client
   cli.ts             command-line entry point
 ```

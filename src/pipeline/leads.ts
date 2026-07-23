@@ -27,8 +27,24 @@ export function markLeadDoNotContact(leadId: number) {
 
 export function closeDeal(leadId: number, outcome: "won" | "lost") {
   db.prepare(`UPDATE leads SET status = ? WHERE id = ?`).run(outcome, leadId);
-  db.prepare(`UPDATE deals SET status = ?, updated_at = datetime('now') WHERE lead_id = ? AND status = 'open'`).run(
-    outcome,
-    leadId
-  );
+}
+
+export interface LeadWithLatestReply extends LeadSummary {
+  latest_reply: string | null;
+  reply_received_at: string | null;
+}
+
+export function listLeadsAwaitingPricing(): LeadWithLatestReply[] {
+  return db
+    .prepare(
+      `SELECT l.id, l.name, l.category, l.country, l.contact_email, l.status, l.discovered_at,
+              r.body as latest_reply, r.received_at as reply_received_at
+       FROM leads l
+       LEFT JOIN replies r ON r.id = (
+         SELECT id FROM replies WHERE lead_id = l.id ORDER BY received_at DESC LIMIT 1
+       )
+       WHERE l.status = 'awaiting_pricing'
+       ORDER BY r.received_at DESC`
+    )
+    .all() as LeadWithLatestReply[];
 }
