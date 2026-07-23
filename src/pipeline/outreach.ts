@@ -1,7 +1,8 @@
 import { db } from "../db/client.js";
 import { loadBusinessInfo } from "../config/business.js";
 import { composeOutreachEmail } from "../outreach/emailComposer.js";
-import { sendEmail, sleep } from "../email/outlookSender.js";
+import { sendEmail } from "../email/graphSender.js";
+import { sleep } from "../utils/sleep.js";
 
 interface LeadRow {
   id: number;

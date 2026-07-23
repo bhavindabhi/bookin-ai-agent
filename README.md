@@ -20,21 +20,33 @@ cp .env.example .env
 
 Edit `.env`:
 
-- `EMAIL_USER`, `EMAIL_APP_PASSWORD` — **required to actually send**. Your
-  Outlook mailbox + an SMTP app password.
-  - Outlook.com (personal): enable 2-factor auth, then create an app
-    password at https://account.live.com/proofs/AppPassword. Use
-    `smtp.office365.com:587`.
-  - Microsoft 365 / work account: your org's admin needs to enable SMTP AUTH
-    for the mailbox (many tenants disable it by default). If they won't, the
-    fallback is Microsoft Graph API with `Mail.Send` permission instead of
-    SMTP — a bigger setup step, ask if you want that wired in later.
+- `EMAIL_USER`, `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET` —
+  **required to actually send**. Sends via Microsoft Graph (app-only auth),
+  not SMTP — most Microsoft 365 tenants now block Basic Auth/app passwords
+  for SMTP, so this is the path that reliably works. One-time setup:
+  1. In https://portal.azure.com → **App registrations** → **+ New
+     registration**. Any name, default account type, no redirect URI.
+  2. **API permissions** → **+ Add a permission** → **Microsoft Graph** →
+     **Application permissions** → search `Mail.Send` → add it → click
+     **Grant admin consent**.
+  3. **Certificates & secrets** → **+ New client secret** → copy the
+     **value** immediately (shown once).
+  4. Copy the **Application (client) ID** and **Directory (tenant) ID**
+     from the app's Overview page.
+  5. Put all four into `.env` as shown in `.env.example`.
+
+  Note: an app-only `Mail.Send` permission can send as *any* mailbox in the
+  tenant, not just `EMAIL_USER`'s. For a solo/small setup that's usually
+  fine; if you want it locked to one mailbox, ask your admin to add an
+  Exchange **Application Access Policy** scoping this app to that mailbox
+  only.
 - `BUSINESS_NAME`, `SENDER_NAME`, `SENDER_EMAIL`, `BUSINESS_ADDRESS` —
   **required**. Used in every outreach email. A physical address is required
   by CAN-SPAM (US) and expected under GDPR/PECR (UK/EU) for B2B marketing
   email — see "Legal notes" below.
 - `EMAIL_SEND_DELAY_MS` — delay between each send (default 4000ms). Keeps
-  you under Outlook's sending limits and avoids looking like a spam blast.
+  you under Graph/Exchange sending limits and avoids looking like a spam
+  blast.
 - `ANTHROPIC_API_KEY` — **optional**. Without it, outreach emails use a
   plain template (still fully functional). With it, each email is
   personalized per lead.
@@ -51,7 +63,7 @@ Edit `.env`:
 npm run agent -- discover --region "United Kingdom" --category "dental clinic" --limit 10
 npm run agent -- discover --region "United Arab Emirates" --category "dental supply distributor"
 
-# 2. Send the B2B outreach email — this actually sends, for real, via your Outlook account
+# 2. Send the B2B outreach email — this actually sends, for real, via Microsoft Graph
 npm run agent -- outreach
 # ...or preview first without sending anything:
 npm run agent -- outreach --dry-run
@@ -98,9 +110,9 @@ ask and it can be wired in.
   than to individuals, but you should still identify yourself clearly,
   state why you're contacting them, and honor opt-outs immediately. Avoid
   emailing personal/individual addresses without a lawful basis.
-- **Sending limits / deliverability**: Outlook/Office 365 SMTP throttles
-  and can flag accounts that suddenly send lots of near-identical emails.
-  Keep `EMAIL_SEND_DELAY_MS` set, start with small batches (`--limit`), and
+- **Sending limits / deliverability**: Microsoft 365 throttles and can flag
+  accounts that suddenly send lots of near-identical emails. Keep
+  `EMAIL_SEND_DELAY_MS` set, start with small batches (`--limit`), and
   watch `sent-log` for failures before scaling up.
 - **Do-not-contact**: if anyone asks to stop hearing from you, run
   `do-not-contact --lead-id <id>` immediately.
@@ -117,7 +129,8 @@ ask and it can be wired in.
 ```
 src/
   leads/            lead discovery: mock / free web-scrape / SerpAPI / Google Places
-  email/             SMTP sender (Outlook)
+  email/             Microsoft Graph sender (app-only auth)
+  utils/             small shared helpers (sleep)
   pricing/          pricebook + rule-based negotiation engine (used only by suggest-price)
   outreach/         email composer (LLM or template) + reply parsing
   pipeline/         orchestration: discover, outreach, log-reply, suggest-price, leads, dashboard
