@@ -1,0 +1,23 @@
+{
+  "name": "dental-supply-outreach-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Agent that discovers dental product buyers (local + international), drafts personalized Outlook outreach, negotiates price within your rules, and tracks conversion.",
+  "type": "module",
+  "scripts": {
+    "agent": "tsx src/cli.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "better-sqlite3": "^11.5.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.9.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

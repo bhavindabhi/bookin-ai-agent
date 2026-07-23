@@ -1,0 +1,39 @@
+{
+  "currency": "GBP",
+  "products": [
+    {
+      "sku": "DENT-GLOVES-100",
+      "name": "Nitrile Examination Gloves (box of 100)",
+      "listPrice": 6.5,
+      "floorPrice": 4.8,
+      "unit": "box",
+      "volumeTiers": [
+        { "minQty": 50, "unitPrice": 6.0 },
+        { "minQty": 200, "unitPrice": 5.4 },
+        { "minQty": 500, "unitPrice": 4.9 }
+      ]
+    },
+    {
+      "sku": "DENT-COMPOSITE-A2",
+      "name": "Dental Composite Resin A2 (4g syringe)",
+      "listPrice": 18.0,
+      "floorPrice": 13.5,
+      "unit": "syringe",
+      "volumeTiers": [
+        { "minQty": 20, "unitPrice": 16.5 },
+        { "minQty": 100, "unitPrice": 14.75 }
+      ]
+    },
+    {
+      "sku": "DENT-IMPRESSION-TRAY",
+      "name": "Disposable Impression Trays (pack of 25)",
+      "listPrice": 9.0,
+      "floorPrice": 6.75,
+      "unit": "pack",
+      "volumeTiers": [
+        { "minQty": 30, "unitPrice": 8.2 },
+        { "minQty": 100, "unitPrice": 7.2 }
+      ]
+    }
+  ]
+}
