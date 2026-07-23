@@ -75,3 +75,17 @@ export async function sendEmail(to: string, subject: string, body: string): Prom
     return { ok: false, error: err instanceof Error ? err.message : String(err) };
   }
 }
+
+/**
+ * Sends a fixed test email from EMAIL_USER to itself, to verify the Azure
+ * app registration + Graph credentials work before running real outreach.
+ */
+export async function sendTestEmail(): Promise<SendResult> {
+  const to = process.env.EMAIL_USER;
+  if (!to) return { ok: false, error: "EMAIL_USER not set (see .env.example)" };
+  return sendEmail(
+    to,
+    "Dental Outreach Agent — connectivity test",
+    "This confirms Microsoft Graph authentication and sending are working for the dental outreach agent."
+  );
+}

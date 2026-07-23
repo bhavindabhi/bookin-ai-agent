@@ -2,6 +2,7 @@ import "dotenv/config";
 import fs from "node:fs";
 import { discoverAndStoreLeads } from "./leads/discovery.js";
 import { sendOutreachToNewLeads } from "./pipeline/outreach.js";
+import { sendTestEmail } from "./email/graphSender.js";
 import { logReply } from "./pipeline/logReply.js";
 import { suggestPriceForLead } from "./pipeline/suggestPrice.js";
 import { listLeads, closeDeal, markLeadDoNotContact } from "./pipeline/leads.js";
@@ -28,6 +29,18 @@ async function main() {
       const result = await discoverAndStoreLeads({ category, region, limit }, arg("--provider"));
       console.log(`[${result.provider}] found ${result.found} lead(s) for "${category}" in "${region}"`);
       for (const l of result.leads) console.log(`  - ${l.name} <${l.contactEmail ?? "no email found"}>`);
+      break;
+    }
+
+    case "test-send": {
+      console.log("Sending a test email to yourself via Microsoft Graph...");
+      const result = await sendTestEmail();
+      if (result.ok) {
+        console.log(`Sent. Check the inbox (and Sent Items) for ${process.env.EMAIL_USER}.`);
+      } else {
+        console.error(`Failed: ${result.error}`);
+        process.exitCode = 1;
+      }
       break;
     }
 
@@ -117,7 +130,8 @@ async function main() {
 
 Commands:
   discover --region "<country/region>" [--category "dental clinic"] [--limit 10] [--provider mock|web-scrape|serpapi|google-places]
-  outreach [--dry-run] [--limit N] [--delay-ms N]      composes + actually sends via your Outlook SMTP account
+  test-send                                             sends a test email to yourself via Microsoft Graph, to verify setup
+  outreach [--dry-run] [--limit N] [--delay-ms N]      composes + actually sends via Microsoft Graph
   log-reply --lead-id <id> (--file reply.txt | --text "...")   record a client's reply, no auto response
   suggest-price --lead-id <id> [--sku <SKU>] [--qty <n>] [--offer <price>]   read-only pricing suggestion
   leads [--status new|contacted|awaiting_pricing|won|lost|do_not_contact]
