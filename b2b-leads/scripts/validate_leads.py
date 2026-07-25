@@ -127,6 +127,11 @@ def load_suppression() -> tuple[set[str], set[str], dict[str, str]]:
 
 def check_schema(header: list[str]) -> list[Issue]:
     if not header:
+        if (LEADS.parent / f"{LEADS.name}.template").exists():
+            return [Issue(BLOCK, "", f"{LEADS.name} not present. It is untracked "
+                                     "because this repository is public — see "
+                                     "data/.gitignore. Copy leads.csv.template to "
+                                     "leads.csv to work locally.")]
         return [Issue(BLOCK, "", f"{LEADS.name} is missing or has no header row")]
     issues = []
     missing = [c for c in EXPECTED_COLUMNS if c not in header]

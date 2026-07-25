@@ -1,0 +1,20 @@
+# This repository is PUBLIC (verified 2026-07-25 via the GitHub API:
+# bhavindabhi/bookin-ai-agent -> "visibility": "public").
+#
+# Real lead data and the suppression list contain personal data: named contacts,
+# business email addresses, and — in the suppression list — a record of who objected
+# to being contacted. Committing any of that to a public repository publishes it to
+# the world, which is a UK GDPR breach and would also expose Hospitrade's prospect
+# and customer lists to competitors.
+#
+# So the live CSVs are deliberately untracked. Only the *.csv.template header files
+# are committed.
+#
+# To lift this: make the repository private, then delete this file and commit the
+# live CSVs. Until then the pipeline cannot persist lead data between scheduled runs
+# — see README "Data location".
+
+leads.csv
+suppression-list.csv
+rejected.csv
+manual-review.csv

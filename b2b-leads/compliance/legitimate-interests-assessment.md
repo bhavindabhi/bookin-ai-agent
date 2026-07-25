@@ -124,7 +124,16 @@ by legitimate interests in not re-contacting people who asked us not to.
 
 **Owner sign-off**
 
-- Name: ______________________  Date: ____________
-- I confirm the published privacy policy covers this processing: ☐
-- I confirm the company registration number and VAT status for the signature: ☐
-- Approved daily sending cap: ________
+- **APPROVED AS WRITTEN — 2026-07-25**, by the holder of `bhavin@hospitrade.co.uk`,
+  owner of Hospitrade Ltd. Printed name to be recorded with the email signature
+  details (see `config/decisions.md`).
+- Approval covers this assessment in full, including the seven conditions in
+  "Outcome" above. If any of those conditions stops being true, this LIA is void and
+  processing stops until it is redone.
+- I confirm the published privacy policy covers this processing: ☐ *(outstanding)*
+- I confirm the company registration number and VAT status for the signature:
+  ☐ *(outstanding)*
+- Approved daily sending cap: ________ *(outstanding, default 10)*
+
+The three outstanding items above do not affect the validity of this assessment, but
+each remains an independent hard block on sending.

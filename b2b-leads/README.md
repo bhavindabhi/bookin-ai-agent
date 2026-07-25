@@ -23,6 +23,42 @@ b2b-leads/
     └── validate_leads.py           The gate. Exits 1 if anything blocks.
 ```
 
+## Data location — READ THIS FIRST
+
+**This repository is public** (verified 2026-07-25 via the GitHub API:
+`bhavindabhi/bookin-ai-agent` → `"visibility": "public"`).
+
+Lead records and the suppression list are personal data. The suppression list is
+especially sensitive: it is a record of who objected to being contacted. Publishing
+either would be a UK GDPR breach and would hand Hospitrade's prospect and customer
+lists to competitors.
+
+Consequently `data/leads.csv` and `data/suppression-list.csv` are **untracked**
+(`data/.gitignore`); only `*.csv.template` headers are committed. Nothing has leaked —
+those files were header-only when this was found.
+
+**The practical consequence:** scheduled runs clone this repo fresh, so with the live
+CSVs untracked the pipeline **cannot persist leads or suppressions between runs**. That
+makes recurring outreach unsafe — a permanent suppression list that doesn't persist
+would let an opted-out practice be re-contacted, which is the single worst failure this
+system can have.
+
+Fix, in order of preference:
+
+1. **Make the repository private**, then delete `data/.gitignore` and commit the live
+   CSVs. Restores full function; one setting change.
+2. Move the lead database to private storage outside git (private Sheet, database) and
+   point the scripts at it.
+3. Keep it public and run the pipeline as one-shot only, with the owner storing the CSVs
+   themselves between sessions. Workable but fragile.
+
+Until one of these is done, treat this system as ready-to-run but not yet
+persistent-safe.
+
+Existing Shopify customers are **not** copied into this repo. They are cross-checked
+live against the Shopify customer list at validation time, which is both better data
+minimisation and always current.
+
 ## Workflow
 
 1. **Research** — authorised sources only (see below). Record the exact source URL.
