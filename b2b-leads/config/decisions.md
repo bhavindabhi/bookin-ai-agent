@@ -88,15 +88,17 @@ the policy is unchanged. Must be pasted manually. See
    Connectors. The repository stays public and holds only code and config; `leads.csv`
    and `suppression-list.csv` live in Drive, read and rewritten each run.
 
-   **Blocked until the connector is authorised** — it is not installed yet, and it
-   cannot be installed from inside a session. Once it is live:
-   - Point `LEADS` and `SUPPRESSION` in `scripts/validate_leads.py` at the Drive files
-     rather than local paths, keeping local CSVs only as a working cache.
-   - Keep `data/.gitignore` exactly as it is, so a local cache can never be committed
-     to the public repo by accident.
-   - Verify a full round-trip — write a suppression entry, re-read it in a fresh run —
-     before any outreach, because the whole safety model rests on suppressions
-     surviving between runs.
+   **DONE 2026-07-25.** Connector authorised by the owner; Drive folder
+   "Hospitrade B2B Leads" created (`1tG7s-Z_C5E2I5X6IUyWHXHF_cXbSvqlz`) holding
+   `leads_*.csv` and `suppression-list_*.csv`. Round-trip verified byte-exact, and the
+   gate confirmed blocking a lead against the Drive-sourced suppression list. Full
+   procedure in `data/STORAGE.md`.
+
+   Two corrections to what was planned here:
+   - The scripts are **not** pointed at Drive. Python cannot reach MCP connectors, so
+     the agent syncs around the scripts instead; the scripts stay local-file-based.
+   - The connector has **no update tool**, so saves are dated snapshots with
+     newest-wins, not in-place edits.
 4. **Additional exclusions** — the owner opted to supply a list of businesses to exclude
    beyond existing customers and competitors; not yet received.
 

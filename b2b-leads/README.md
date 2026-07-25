@@ -44,19 +44,23 @@ makes recurring outreach unsafe — a permanent suppression list that doesn't pe
 would let an opted-out practice be re-contacted, which is the single worst failure this
 system can have.
 
-**Decided (2026-07-25): the repo stays public and the data moves to Google Drive.**
-The owner will connect the Google Drive connector; `leads.csv` and
-`suppression-list.csv` will live there, with the scripts reading and rewriting them each
-run and `data/.gitignore` kept in place so a local cache can never be committed.
+**Resolved 2026-07-25 — the data lives in Google Drive and this is working.**
 
-Note there is no Google Sheets connector available — Drive holding the CSVs is the
-closest workable equivalent, and it was chosen over Airtable, making the repo private,
-and manual handover.
+Authoritative store: Drive folder **"Hospitrade B2B Leads"**
+(https://drive.google.com/drive/folders/1tG7s-Z_C5E2I5X6IUyWHXHF_cXbSvqlz), owned by
+`hospitrade.uk@gmail.com`. The CSVs under `data/` are a gitignored local cache only.
 
-**Blocked until that connector is authorised.** Until then treat this system as
-ready-to-run but not persistent-safe, and do not begin recurring outreach: a suppression
-list that doesn't survive between runs could let an opted-out practice be re-contacted.
-Verify a write-then-read round-trip on the suppression file before any outreach.
+Read **`data/STORAGE.md`** before touching lead data. Two things there matter most:
+
+- The Drive connector has **no update tool**, so each save writes a new dated snapshot
+  and the newest wins. Old snapshots are kept as an audit trail.
+- The sync is performed **by the agent**, not by the scripts — Python has no access to
+  MCP connectors, so `validate_leads.py` stays local-file-based and something must pull
+  from Drive before it runs and push after.
+
+Verified end to end on 2026-07-25: byte-exact round-trip (802 bytes, matching SHA-256),
+and the gate correctly blocked a test lead whose domain was on the Drive-sourced
+suppression list.
 
 Existing Shopify customers are **not** copied into this repo. They are cross-checked
 live against the Shopify customer list at validation time, which is both better data
