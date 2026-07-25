@@ -23,11 +23,33 @@ store pages `/pages/b2b` and `/pages/trade-accounts`, Microsoft 365 profile.
 | Currency / market | GBP, United Kingdom | Shopify shop record |
 | Location descriptor | Harrow, Greater London — supplying across the UK | `/pages/trade-accounts` |
 
-### Company number & VAT — NOT VERIFIED
-Neither the Shopify record nor the trade pages expose a company registration number
-or VAT number. UK company law requires the registered company number, place of
-registration and registered office on business email. **Owner must supply these
-before any email is sent.** See `compliance/rules.md` §Signature.
+### Company number & registered office — from Companies House, NEEDS OWNER CONFIRMATION
+
+Companies House lists **HOSPITRADE LTD, company number 14914181**, a private limited
+company, **incorporated 5 June 2023**, status active, registered office
+**12 Knowles Court, 24 Gayton Road, Harrow, HA1 2HA**.
+Source: https://find-and-update.company-information.service.gov.uk/company/14914181
+
+This was read from search results — Companies House blocks automated page fetches — so
+**the owner must confirm the number and registered office before it goes into a
+signature.** A wrong company number on business correspondence is worse than none.
+
+Three things follow, and all three need the owner's attention:
+
+1. **The registered office differs from the address currently used in outreach.**
+   Prior outreach and the first draft of these templates used *42 Bessborough Road,
+   HA1 3DL*, which is the Shopify billing address, not the registered office. The
+   Shopify billing record confusingly holds `address1: 42 Bessborough Road` and
+   `address2: 24 gayton road` — two different addresses in one record. Under the
+   Companies Act 2006 the **registered office** is what must appear.
+2. **Nothing on the website states the company number or registered office at all.**
+   `/pages/about` gives no number; `/pages/contact` gives the address only as
+   "Hospitrade Ltd, London, United Kingdom". UK law requires the registered company
+   number, place of registration and registered office on a company's website and
+   business email. This is a live compliance gap independent of outreach.
+3. **No VAT number is published anywhere.** Either Hospitrade is not VAT registered —
+   plausible at this trading volume — or the number is missing from the site, which
+   would itself be a defect on VAT invoices. Owner must state which.
 
 ---
 
@@ -135,6 +157,26 @@ and the signature must omit a phone number until one is confirmed.
 
 ---
 
+## 5b. Website claims I will not repeat without evidence
+
+`/pages/about` makes assertions I could not substantiate against the live store. None
+may be used in outreach until the owner provides evidence. Several are also risky on
+the website itself.
+
+| Claim on /pages/about | Problem |
+|---|---|
+| "premium brands including **3M ESPE**" | Every product in the store lists vendor "Hospitrade Ltd". No 3M ESPE line found. Naming another manufacturer's brand without stocking it is a misrepresentation risk. |
+| "**Every** product we stock is CE certified" | A blanket regulatory claim across the whole catalogue, which includes consumer items such as snap-on dentures and home whitening kits. "CE certificates available on request" is defensible; "every product is CE certified" is a guarantee. |
+| "meet **CQC Regulation 12 and HTM 01-05** requirements" | A regulatory-compliance claim about products. Needs documentary backing per line. |
+| "**54+** Product Categories" | The store has 17 collections and roughly 93 products. |
+| "nationwide **since 2024**" | Companies House shows incorporation on 5 June 2023. |
+| "2–4 working day delivery to **every** UK postcode" | A fourth variant of the delivery promise, and "every postcode" is an absolute. |
+
+The safe alternative, already used in the templates: "CE certificates, ISO
+documentation and safety data sheets are available on request." That is a statement
+about paperwork availability, which is verifiable and true, rather than a guarantee
+about regulatory status.
+
 ## 6. NEVER claim (per owner brief, regardless of source)
 
 Cheapest prices · guaranteed savings · same-day delivery everywhere · free samples ·
@@ -153,9 +195,9 @@ purpose is a regulatory claim and is prohibited.
 {{SENDER_NAME}}
 {{SENDER_TITLE}}
 Hospitrade Ltd
-42 Bessborough Road, Harrow, HA1 3DL, United Kingdom
 sales@hospitrade.co.uk | hospitrade.co.uk
 Registered in England and Wales, company no. {{COMPANY_NUMBER}}
+Registered office: {{REGISTERED_OFFICE}}
 {{VAT_LINE}}
 
 You are receiving this business enquiry because your practice is publicly listed as a

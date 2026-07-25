@@ -20,9 +20,9 @@ Rules that apply to every template below:
 {{SENDER_NAME}}
 {{SENDER_TITLE}}
 Hospitrade Ltd
-42 Bessborough Road, Harrow, HA1 3DL, United Kingdom
 sales@hospitrade.co.uk | hospitrade.co.uk
 Registered in England and Wales, company no. {{COMPANY_NUMBER}}
+Registered office: {{REGISTERED_OFFICE}}
 {{VAT_LINE}}
 
 You're receiving this business enquiry because {{business_name}} is publicly listed as

@@ -1,7 +1,9 @@
 {
-  "_comment": "Copy to sender.json and fill in. Every value must be non-empty before sending is unblocked. COMPANY_NUMBER is a UK legal requirement on business email.",
+  "_comment": "Copy to sender.json and fill in. Every value must be non-empty before sending is unblocked. COMPANY_NUMBER and REGISTERED_OFFICE are UK legal requirements on business email (Companies Act 2006).",
+  "_companies_house": "Companies House lists HOSPITRADE LTD as 14914181, registered office 12 Knowles Court, 24 Gayton Road, Harrow, HA1 2HA. Confirm before use — do not assume. Note this is NOT 42 Bessborough Road, which is the Shopify billing address.",
   "SENDER_NAME": "",
   "SENDER_TITLE": "",
   "COMPANY_NUMBER": "",
+  "REGISTERED_OFFICE": "",
   "VAT_LINE": "VAT registration number GB________  (or: 'Not VAT registered')"
 }
