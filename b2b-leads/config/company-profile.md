@@ -105,11 +105,16 @@ These are all directly evidenced by the live store or trade pages:
 
 ---
 
-## 5. BLOCKED claims — the site contradicts itself. Do not use until owner rules.
+## 5. BLOCKED claims — the site contradicts itself
 
-The two trade pages and the product pages state **three different delivery promises
-and two different phone numbers**. Until the owner confirms which is correct, none of
-these may appear in outreach.
+**Owner ruling, 2026-07-25: omit all quantified claims.** Outreach describes capability
+without numbers — "UK-held stock and UK-wide delivery" — and the signature carries no
+telephone number. This ruling stands until the owner supplies corrected wording; it is
+not a statement that any version below is wrong, only that none may be quoted.
+
+The website still needs fixing separately: it currently shows customers three different
+delivery promises, two dispatch cutoffs, two credit-terms statements and three phone
+numbers. That is a live customer-facing inconsistency independent of outreach.
 
 | Claim | Version A (`/pages/b2b`) | Version B (`/pages/trade-accounts`) | Version C (product pages) |
 |---|---|---|---|
