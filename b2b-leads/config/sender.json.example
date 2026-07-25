@@ -1,0 +1,7 @@
+{
+  "_comment": "Copy to sender.json and fill in. Every value must be non-empty before sending is unblocked. COMPANY_NUMBER is a UK legal requirement on business email.",
+  "SENDER_NAME": "",
+  "SENDER_TITLE": "",
+  "COMPANY_NUMBER": "",
+  "VAT_LINE": "VAT registration number GB________  (or: 'Not VAT registered')"
+}
