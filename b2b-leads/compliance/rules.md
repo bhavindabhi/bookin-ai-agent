@@ -95,8 +95,8 @@ Opt-out requests are actioned on the same working day they are seen.
 
 - Sender identified as Hospitrade Ltd — no obscured or misleading sender name.
 - Registered office address present.
-- Company registration number and place of registration present
-  (**currently missing — blocks all sending**, see `config/company-profile.md` §1).
+- Company registration number and place of registration present — resolved: company
+  no. 14914181, registered in England and Wales, in `config/sender.json`.
 - Working reply-based opt-out, honoured manually within one working day.
 - Link to the privacy policy.
 - Subject line describes the actual content; no false "Re:"/"Fwd:", no fake urgency,
@@ -109,7 +109,7 @@ Opt-out requests are actioned on the same working day they are seen.
 Default mode is **DRAFT ONLY**. Sending requires the owner to say
 "Enable approved sending mode", and even then:
 
-- Max 10 emails per working day to start.
+- Max 20 emails per working day (owner-set 2026-07-25; see config/decisions.md).
 - Tuesday–Thursday, 09:30–16:30 UK time; not weekends or UK public holidays.
 - Spread across the window, never a single batch in one minute.
 - **One recipient per email.** Bulk BCC to unrelated businesses is prohibited: it is

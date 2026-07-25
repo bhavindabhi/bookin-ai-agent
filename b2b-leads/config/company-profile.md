@@ -124,6 +124,9 @@ These are all directly evidenced by the live store or trade pages:
 - Stock is held in the UK.
 - A paid sample option exists on at least one line (single surgical gown, £3.00).
 - Based in Harrow, Greater London; supplies UK-wide.
+- **Free samples: multi-site dental groups only** (owner-approved 2026-07-25). All other
+  segments get the paid sample option only. Never promise free sample *shipping* —
+  that was not approved.
 
 ---
 

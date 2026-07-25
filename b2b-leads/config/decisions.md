@@ -42,14 +42,43 @@ first; then the rest of England, Scotland, Wales, Northern Ireland.
 
 **Lead database location** — this repository, `b2b-leads/data/`.
 
+**Registered details — confirmed.** Company number 14914181, registered office
+12 Knowles Court, 24 Gayton Road, Harrow, HA1 2HA. **Not VAT registered.** Signature is
+Bhavin Darji, Director. Written into `config/sender.json`.
+
+**Daily sending cap — 20 per working day.**
+Set at the owner's instruction. I advised 10 on the grounds that hospitrade.co.uk has no
+cold-outreach sending history and a cold domain ramping fast risks permanent spam
+placement; the owner chose 20 and that is the operative figure. Recorded here so the
+reasoning isn't lost, not to reopen it. The automatic stops are unchanged and are the
+real protection: halt on bounce rate above 3%, on any complaint, on any provider
+restriction, and on any reputation warning. If the first two weeks are clean at 20 there
+is nothing more to do; if bounces climb, the auto-stop fires before reputation damage
+compounds.
+
+**Samples — free for multi-site groups only, paid for everyone else.**
+- Multi-site dental groups (Campaign C): a free sample **may** be offered.
+- All other segments: the verified paid sample option only (single surgical gown, £3.00).
+- Never promise a free sample to a non-group prospect, and never promise free
+  *shipping* of a sample, which has not been approved.
+
+**Privacy policy** — owner approved automatic publishing of the new prospect-data
+section, but the Shopify connection lacks `write_legal_policies`, so it was refused and
+the policy is unchanged. Must be pasted manually. See
+`compliance/privacy-policy-addition.md`.
+
 ### Still outstanding — these block sending
 
-1. Company registration number (UK legal requirement on business email).
-2. VAT number, or confirmation that Hospitrade is not VAT registered.
-3. Sender name and job title for the signature.
-4. Confirmation that the published privacy policy covers B2B prospect data, its source
-   and the legitimate-interests basis (UK GDPR Art. 14).
-5. Owner sign-off on the LIA.
-6. Approved daily sending cap (default 10).
-7. Exclusion list: existing customers and any businesses never to contact.
-8. Whether a paid sample may be offered, and on which lines.
+1. **Outlook mail-write access** — the chosen drafting route is unavailable until the
+   owner authorises a connector with `Mail.ReadWrite` for `bhavin@hospitrade.co.uk`.
+2. **Privacy policy section** — needs pasting into Shopify Admin (or the
+   `write_legal_policies` scope granting so it can be done automatically).
+3. **Where the lead database lives** — this repository is public, so leads and the
+   suppression list cannot be committed. See README "Data location". Making the repo
+   private is the recommended fix; unanswered so far.
+4. **Additional exclusions** — the owner opted to supply a list of businesses to exclude
+   beyond existing customers and competitors; not yet received.
+
+Resolved: LIA sign-off · company number and registered office · VAT status · sender
+name and title · daily cap · sample policy · claims ruling · campaign focus ·
+exclusion approach.

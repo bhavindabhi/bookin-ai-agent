@@ -98,7 +98,8 @@ can set up recurring standing orders so sites don't run essentials down.
 
 For a group your size, the sensible starting point is a schedule of your highest-volume
 SKUs and a trade price against each. If you can share a consumables list — or your
-current supplier's order history — I'll price it and you can compare directly.
+current supplier's order history — I'll price it and you can compare directly. We can
+also send samples of anything you'd want your clinicians to assess first.
 
 Who handles procurement across the group?
 
@@ -214,7 +215,7 @@ These are drafts for the owner, never auto-sent.
 | Interested | Draft reply, notify owner same day. |
 | Catalogue request | Link `/pages/brochure`. Never attach, never quote prices not in Shopify. |
 | Pricing request | Pull live prices from Shopify only. Never estimate or round. Flag if a requested SKU isn't stocked. |
-| Sample request | Do not promise a free sample. A paid sample SKU exists (single gown, £3.00). Escalate to owner. |
+| Sample request | **Multi-site groups:** a free sample may be offered (owner-approved). **Everyone else:** offer the paid sample option only (single gown, £3.00) — do not promise a free one. Never promise free sample shipping, which was not approved. |
 | Call / meeting | Check owner's Outlook calendar availability before proposing any time. |
 | Already has a supplier | Offer to be a benchmark quote, once. If declined, stop. |
 | Not interested | Thank them, stop the sequence, mark `not_interested`. |

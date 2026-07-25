@@ -10,14 +10,15 @@ Nothing in here sends email. Sending is unlocked only by the owner explicitly sa
 b2b-leads/
 ├── config/
 │   ├── company-profile.md          Verified facts + APPROVED / BLOCKED / NEVER claims
-│   ├── sender.json.example         Signature placeholders — copy to sender.json
+│   ├── decisions.md                Owner decisions — the standing instruction set
+│   ├── sender.json                 Confirmed signature values (committed deliberately)
 │   └── campaigns/campaigns.md      Campaigns A–F, follow-ups, reply handling
 ├── compliance/
 │   ├── rules.md                    The accept/reject/review gate
-│   └── legitimate-interests-assessment.md   LIA — needs owner sign-off
+│   ├── legitimate-interests-assessment.md   LIA — signed 2026-07-25
+│   └── privacy-policy-addition.md  Prospect-data section awaiting publication
 ├── data/
-│   ├── leads.csv                   CRM table (42 columns)
-│   └── suppression-list.csv        Append-only, permanent
+│   ├── *.csv.template              Headers only — live CSVs are untracked, see below
 └── scripts/
     ├── score_lead.py               0–100 scoring model
     └── validate_leads.py           The gate. Exits 1 if anything blocks.
@@ -87,13 +88,15 @@ email addresses from name patterns.
 
 Enforced by `validate_leads.py`; all must clear.
 
-| Block | Cleared by |
+| Block | Status |
 |---|---|
-| Company registration number missing from signature | Owner supplies it → `config/sender.json` |
-| LIA not signed off | Owner signs `compliance/legitimate-interests-assessment.md` |
-| Privacy policy may not cover prospect data | Owner confirms or updates it |
-| Delivery, dispatch, free-delivery, credit and phone claims contradict each other across the site | Owner rules on the canonical version (`company-profile.md` §5) |
-| Unverified address, sole trader, free webmail, suppressed, duplicate, unscored, score <50 without approval | Per-lead fixes |
+| Signature: company number, registered office, sender name | **Cleared** — `config/sender.json`, owner-confirmed 2026-07-25 |
+| LIA not signed off | **Cleared** — signed 2026-07-25 |
+| Contradictory delivery / credit / phone claims | **Cleared** — owner ruled: omit all quantified claims |
+| Privacy policy doesn't cover prospect data | **OPEN** — text drafted in `compliance/privacy-policy-addition.md`, needs pasting into Shopify |
+| No Outlook mail-write access | **OPEN** — drafts cannot be created until a connector with `Mail.ReadWrite` is authorised |
+| Lead database has nowhere safe to live (public repo) | **OPEN** — see "Data location" above |
+| Unverified address, sole trader, free webmail, suppressed, duplicate, unscored, score <50 without approval | Per-lead fixes, enforced automatically |
 
 `config/sender.json` **must be committed** — scheduled runs clone the repo fresh and
 will otherwise have no signature values and refuse to draft.
@@ -106,7 +109,7 @@ below 50 needs explicit owner approval. `--rubric` prints the bands.
 
 ## Sending limits, once enabled
 
-One recipient per email · max 10/working day · Tue–Thu 09:30–16:30 UK · spread across
+One recipient per email · max 20/working day · Tue–Thu 09:30–16:30 UK · spread across
 the window · never weekends or UK public holidays · sequence capped at initial + 2
 follow-ups then permanent stop · automatic halt on any complaint, >3% bounce rate, or
 any provider/reputation warning.
@@ -116,10 +119,16 @@ tracking unreliable, and a BCC mistake discloses one practice's address to anoth
 
 ## Mailbox
 
-The owner's Microsoft 365 account is `bhavin@hospitrade.co.uk`. The connected
-Microsoft 365 tools in this environment are **read-only** (search mail/calendar/files)
-— there is no create-draft or send capability, so **Outlook drafts cannot currently be
-created programmatically**. Options: the owner enables an Outlook connector with mail
-write scope, or drafts are prepared in the Gmail account already connected
-(`hospitrade.uk@gmail.com`), or drafts are supplied as text for manual paste.
-See the pending owner decision in the session report.
+Drafts go to the owner's Microsoft 365 mailbox `bhavin@hospitrade.co.uk`
+(owner decision, 2026-07-25) so outreach comes from the company domain rather than a
+free webmail address.
+
+**This is currently blocked.** The connected Microsoft 365 tools are read-only — mail,
+calendar and file *search* only, with no create-draft or send capability — so Outlook
+drafts cannot be created programmatically. It needs a connector authorised with
+`Mail.ReadWrite` for that mailbox.
+
+Do **not** silently fall back to the Gmail account (`hospitrade.uk@gmail.com`) that
+earlier agents used. The owner chose the business mailbox deliberately, and a dental
+supplier cold-emailing practices from a free gmail.com address reads as less credible
+and builds no reputation on hospitrade.co.uk.
