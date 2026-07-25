@@ -74,8 +74,29 @@ the policy is unchanged. Must be pasted manually. See
 2. **Privacy policy section** — needs pasting into Shopify Admin (or the
    `write_legal_policies` scope granting so it can be done automatically).
 3. **Where the lead database lives** — this repository is public, so leads and the
-   suppression list cannot be committed. See README "Data location". Making the repo
-   private is the recommended fix; unanswered so far.
+   suppression list cannot be committed. See README "Data location".
+
+   Owner chose "keep the repo public, store the data in a Google Sheet" (2026-07-25).
+   **That is not currently executable.** Checked: no Google Sheets or Google Drive
+   connector is installed — the only Google connector is Google Calendar — and the
+   installed Microsoft 365 tools are read-only (search only, no write), so Excel on
+   OneDrive is not an option either. The MCP registry has no Google Sheets connector at
+   all; Google Drive is the nearest equivalent.
+
+   **Resolved 2026-07-25: Google Drive.** The owner will connect the Google Drive
+   connector (`create_file`, `read_file_content`, `search_files`) at claude.ai →
+   Connectors. The repository stays public and holds only code and config; `leads.csv`
+   and `suppression-list.csv` live in Drive, read and rewritten each run.
+
+   **Blocked until the connector is authorised** — it is not installed yet, and it
+   cannot be installed from inside a session. Once it is live:
+   - Point `LEADS` and `SUPPRESSION` in `scripts/validate_leads.py` at the Drive files
+     rather than local paths, keeping local CSVs only as a working cache.
+   - Keep `data/.gitignore` exactly as it is, so a local cache can never be committed
+     to the public repo by accident.
+   - Verify a full round-trip — write a suppression entry, re-read it in a fresh run —
+     before any outreach, because the whole safety model rests on suppressions
+     surviving between runs.
 4. **Additional exclusions** — the owner opted to supply a list of businesses to exclude
    beyond existing customers and competitors; not yet received.
 

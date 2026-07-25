@@ -44,17 +44,19 @@ makes recurring outreach unsafe — a permanent suppression list that doesn't pe
 would let an opted-out practice be re-contacted, which is the single worst failure this
 system can have.
 
-Fix, in order of preference:
+**Decided (2026-07-25): the repo stays public and the data moves to Google Drive.**
+The owner will connect the Google Drive connector; `leads.csv` and
+`suppression-list.csv` will live there, with the scripts reading and rewriting them each
+run and `data/.gitignore` kept in place so a local cache can never be committed.
 
-1. **Make the repository private**, then delete `data/.gitignore` and commit the live
-   CSVs. Restores full function; one setting change.
-2. Move the lead database to private storage outside git (private Sheet, database) and
-   point the scripts at it.
-3. Keep it public and run the pipeline as one-shot only, with the owner storing the CSVs
-   themselves between sessions. Workable but fragile.
+Note there is no Google Sheets connector available — Drive holding the CSVs is the
+closest workable equivalent, and it was chosen over Airtable, making the repo private,
+and manual handover.
 
-Until one of these is done, treat this system as ready-to-run but not yet
-persistent-safe.
+**Blocked until that connector is authorised.** Until then treat this system as
+ready-to-run but not persistent-safe, and do not begin recurring outreach: a suppression
+list that doesn't survive between runs could let an opted-out practice be re-contacted.
+Verify a write-then-read round-trip on the suppression file before any outreach.
 
 Existing Shopify customers are **not** copied into this repo. They are cross-checked
 live against the Shopify customer list at validation time, which is both better data
